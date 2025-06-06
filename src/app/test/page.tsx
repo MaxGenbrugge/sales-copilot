@@ -2,6 +2,8 @@
 import { useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 
+
+
 export default function TestPage() {
   useEffect(() => {
     const fetchLeads = async () => {
