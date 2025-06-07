@@ -3,10 +3,19 @@
 import { useEffect, useState } from 'react'
 import { useSupabaseClient, useSession } from '@supabase/auth-helpers-react'
 
+// ✅ Type voor één lead
+type Lead = {
+  id: number
+  name: string
+  email: string
+  score: number
+  user_id: string
+}
+
 export default function LeadsList() {
   const supabase = useSupabaseClient()
   const session = useSession()
-  const [leads, setLeads] = useState<any[]>([])
+  const [leads, setLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -18,7 +27,7 @@ export default function LeadsList() {
         .eq('user_id', session.user.id)
         .order('score', { ascending: false })
 
-      if (!error) setLeads(data || [])
+      if (!error) setLeads((data as Lead[]) || [])
       setLoading(false)
     }
 
@@ -39,7 +48,7 @@ export default function LeadsList() {
         </tr>
       </thead>
       <tbody>
-        {leads.map(lead => (
+        {leads.map((lead) => (
           <tr key={lead.id} className="border-b hover:bg-gray-50">
             <td className="py-2">{lead.name}</td>
             <td className="py-2">{lead.email}</td>
