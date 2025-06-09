@@ -12,10 +12,7 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
       alert('❌ Login mislukt: ' + error.message)
@@ -26,16 +23,29 @@ export default function LoginPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    })
+
+    const { data, error } = await supabase.auth.signUp({ email, password })
 
     if (error) {
       alert('❌ Registratie mislukt: ' + error.message)
-    } else {
-      alert('✅ Account aangemaakt! Log nu in.')
+      return
     }
+
+    const userId = data.user?.id ?? data.session?.user.id
+    if (userId) {
+      const { error: insertError } = await supabase.from('profiles').insert({
+        id: userId,
+        subscription_plan: 'Free',
+      })
+
+      if (insertError) {
+        console.error('❌ Fout bij toevoegen aan profiles:', insertError.message)
+      } else {
+        console.log(`✅ Profiel toegevoegd voor ${userId}`)
+      }
+    }
+
+    alert('✅ Account aangemaakt! Log nu in.')
   }
 
   return (
