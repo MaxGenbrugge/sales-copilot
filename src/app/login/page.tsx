@@ -24,28 +24,14 @@ export default function LoginPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const { data, error } = await supabase.auth.signUp({ email, password })
+    const { error } = await supabase.auth.signUp({ email, password })
 
     if (error) {
       alert('❌ Registratie mislukt: ' + error.message)
       return
     }
 
-    const userId = data.user?.id ?? data.session?.user.id
-    if (userId) {
-      const { error: insertError } = await supabase.from('profiles').insert({
-        id: userId,
-        subscription_plan: 'Free',
-      })
-
-      if (insertError) {
-        console.error('❌ Fout bij toevoegen aan profiles:', insertError.message)
-      } else {
-        console.log(`✅ Profiel toegevoegd voor ${userId}`)
-      }
-    }
-
-    alert('✅ Account aangemaakt! Log nu in.')
+    alert('✅ Account aangemaakt! Controleer je e-mail om te bevestigen.')
   }
 
   return (
