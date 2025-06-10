@@ -25,6 +25,10 @@ export default function DashboardPage() {
     router.push('/login')
   }
 
+  const handleGoToPricing = () => {
+    router.push('/pricing')
+  }
+
   if (loading || !session) {
     return <p className="p-6">🔄 Aan het laden...</p>
   }
@@ -45,6 +49,14 @@ export default function DashboardPage() {
         Je bent ingelogd als <strong>{session.user.email}</strong> en hebt het plan: <strong>{plan}</strong>.
       </p>
 
+      {/* 🔘 Knop om naar pricing te gaan */}
+      <button
+        onClick={handleGoToPricing}
+        className="mb-6 border border-black text-black py-2 px-4 rounded hover:bg-gray-100"
+      >
+        Bekijk abonnementen
+      </button>
+
       <AddLeadButton />
       <LeadsList />
 
@@ -57,9 +69,12 @@ export default function DashboardPage() {
       ) : (
         <div className="mt-6 p-4 border rounded bg-yellow-50">
           <h2 className="text-lg font-semibold">🔒 Alleen voor Pro-gebruikers</h2>
-          <p className="text-sm text-gray-600">Upgrade naar Pro om toegang te krijgen tot deze AI-feature.</p>
+          <p className="text-sm text-gray-600">
+            Upgrade naar Pro om toegang te krijgen tot deze AI-feature.
+          </p>
         </div>
       )}
     </div>
   )
 }
+

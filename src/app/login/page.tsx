@@ -34,6 +34,10 @@ export default function LoginPage() {
     alert('✅ Account aangemaakt! Controleer je e-mail om te bevestigen.')
   }
 
+  const handleGoHome = () => {
+    router.push('/')
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white shadow-md rounded px-8 py-6">
@@ -65,6 +69,13 @@ export default function LoginPage() {
             className="w-full border border-black text-black py-2 rounded hover:bg-gray-100"
           >
             Registreren
+          </button>
+          <button
+            type="button"
+            onClick={handleGoHome}
+            className="w-full text-blue-600 underline hover:text-blue-800 text-sm mt-2"
+          >
+            ← Terug naar homepagina
           </button>
         </form>
       </div>
