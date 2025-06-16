@@ -1,24 +1,43 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession, useSupabaseClient } from '@supabase/auth-helpers-react'
-import LeadsList from './LeadsList'
-import UploadLeadsForm from './UploadLeadsForm'
 import useUserPlan from '@/lib/useUserPlan'
+import UploadLeadsForm from './UploadLeadsForm'
+import LeadsList from './LeadsList'
 
 export default function DashboardPage() {
   const session = useSession()
   const supabase = useSupabaseClient()
   const router = useRouter()
   const { plan, loading } = useUserPlan()
+  const [gmailConnected, setGmailConnected] = useState<boolean | null>(null)
 
-  // 🔁 Redirect als niet ingelogd
+  // 🔁 Redirect naar login als niet ingelogd
   useEffect(() => {
     if (!loading && !session) {
       router.push('/login')
     }
-  }, [session, router, loading])
+  }, [session, loading, router])
+
+  // ✅ Check Gmail-status via Supabase
+  useEffect(() => {
+    const checkGmail = async () => {
+      if (!session) return
+
+      const { data, error } = await supabase
+        .from('user_gmail_tokens')
+        .select('user_id')
+        .eq('user_id', session.user.id)
+        .single()
+
+      console.log('[GMAIL STATUS]', { data, error })
+      setGmailConnected(!!data && !error)
+    }
+
+    checkGmail()
+  }, [session, supabase])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -29,7 +48,11 @@ export default function DashboardPage() {
     router.push('/pricing')
   }
 
-  if (loading || !session) {
+  const handleGmailConnect = () => {
+    window.location.href = '/api/gmail/auth-url'
+  }
+
+  if (loading || !session || gmailConnected === null) {
     return <p className="p-6">🔄 Aan het laden...</p>
   }
 
@@ -46,11 +69,31 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      <p className="mb-4">
+      {/* Gebruiker en plan */}
+      <p className="mb-2">
         Je bent ingelogd als <strong>{session.user.email}</strong> en hebt het plan: <strong>{plan}</strong>.
       </p>
 
-      {/* Pricing-button */}
+      {/* Gmail-status */}
+      <p className={`mb-4 text-sm font-semibold ${gmailConnected ? 'text-green-600' : 'text-red-600'}`}>
+        {gmailConnected ? '✅ Gmail verbonden' : '❌ Gmail niet verbonden'}
+      </p>
+
+      {!gmailConnected && (
+        <div className="mb-6 p-4 border bg-blue-50 rounded">
+          <p className="mb-2 text-sm text-blue-700">
+            Je hebt Gmail nog niet gekoppeld. Verbind nu om e-mails te kunnen versturen.
+          </p>
+          <button
+            onClick={handleGmailConnect}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Verbind met Gmail
+          </button>
+        </div>
+      )}
+
+      {/* Pricing-knop */}
       <button
         onClick={handleGoToPricing}
         className="mb-6 border border-black text-black py-2 px-4 rounded hover:bg-gray-100"
@@ -61,10 +104,10 @@ export default function DashboardPage() {
       {/* Leads uploaden */}
       <UploadLeadsForm />
 
-      {/* Leads weergeven */}
+      {/* Leadslijst */}
       <LeadsList />
 
-      {/* AI e-mail functionaliteit */}
+      {/* AI e-mailfunctie */}
       {plan === 'Pro' ? (
         <div className="mt-6 p-4 border rounded bg-green-50">
           <h2 className="text-lg font-semibold">✨ AI-mailfunctie (Pro)</h2>
