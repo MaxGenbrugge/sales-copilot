@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 import { generateAuthUrl } from '@/lib/google'
 import { headers } from 'next/headers'
@@ -11,7 +11,7 @@ function getCookie(name: string, cookieHeader: string): string | undefined {
   return match ? decodeURIComponent(match[1]) : undefined
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET() {
   // 1. Cookies ophalen uit headers
   const cookieHeader = (await headers()).get('cookie') ?? ''
 
@@ -27,7 +27,7 @@ export async function GET(_req: NextRequest) {
   )
 
   // 3. Veilige user ophalen (getUser contacteert de Supabase server)
-  const { data: { user }, error } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
     return NextResponse.json({ error: 'Not signed in' }, { status: 401 })
